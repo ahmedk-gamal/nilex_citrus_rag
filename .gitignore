@@ -1,0 +1,33 @@
+﻿# Streamlit secrets - لا ترفع أبدًا
+.streamlit/
+secrets.toml
+
+# بيئات Python الافتراضية
+venv/
+venv2/
+env/
+nilex_env/
+
+# ملفات Python المؤقتة
+__pycache__/
+*.pyc
+*.pyo
+
+# قاعدة البيانات المتجهة
+chroma_db/
+
+# مجلد البيانات (PDFs الأصلية يمكن أن تكون كبيرة)
+# data/
+
+# إعدادات IDE
+.vscode/
+*.swp
+*.swo
+
+# نظام التشغيل
+.DS_Store
+Thumbs.db
+
+# متغيرات البيئة
+.env
+.env.local
