@@ -19,6 +19,11 @@ api_key = st.sidebar.text_input(
     type="password"
 )
 
+try:
+    hf_token = st.secrets.get("HF_TOKEN")
+except Exception:
+    hf_token = os.getenv("HF_TOKEN")
+
 
 
 # 3. دالة لتحميل قاعدة البيانات
@@ -27,7 +32,11 @@ def load_database():
     CHROMA_DIR = os.path.join(BASE_DIR, "chroma_db")
     DATA_DIR = os.path.join(BASE_DIR, "data")
     
-    embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
+    embeddings = HuggingFaceEmbeddings(
+        model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+        model_kwargs={"device": "cpu", **({"token": hf_token} if hf_token else {})},
+        encode_kwargs={"normalize_embeddings": True}
+    )
     vectorstore = Chroma(persist_directory=CHROMA_DIR, embedding_function=embeddings)
     
     try:

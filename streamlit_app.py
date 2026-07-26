@@ -14,9 +14,11 @@ st.caption("Ask about citrus diseases, symptoms, treatments, and authorized pest
 try:
     api_key = st.secrets["OPENROUTER_API_KEY"]
     model_name = st.secrets["OPENROUTER_MODEL"]
+    hf_token = st.secrets.get("HF_TOKEN")
 except KeyError:
     api_key = os.getenv("OPENROUTER_API_KEY")
     model_name = os.getenv("OPENROUTER_MODEL", "openai/gpt-3.5-turbo")
+    hf_token = os.getenv("HF_TOKEN")
 
 if not api_key:
     st.error("OpenRouter API key not found. Please set OPENROUTER_API_KEY in Streamlit secrets or as an environment variable.")
@@ -27,7 +29,7 @@ CHROMA_DIR = os.path.join(BASE_DIR, "chroma_db")
 DATA_DIR = os.path.join(BASE_DIR, "data")
 
 def get_cached_embeddings():
-    return get_embeddings_model()
+    return get_embeddings_model(token=hf_token)
 
 def load_vectorstore(persist_dir: str = None):
     if persist_dir is None:
