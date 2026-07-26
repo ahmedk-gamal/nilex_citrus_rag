@@ -22,10 +22,46 @@ api_key = st.sidebar.text_input(
 
 
 # 3. دالة لتحميل قاعدة البيانات
-@st.cache_resource
 def load_database():
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    CHROMA_DIR = os.path.join(BASE_DIR, "chroma_db")
+    DATA_DIR = os.path.join(BASE_DIR, "data")
+    
     embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
-    return Chroma(persist_directory="./chroma_db", embedding_function=embeddings)
+    vectorstore = Chroma(persist_directory=CHROMA_DIR, embedding_function=embeddings)
+    
+    try:
+        count = vectorstore._collection.count()
+    except Exception:
+        count = 0
+    
+    if count == 0:
+        with st.spinner("جاري تعبئة قاعدة البيانات لأول مرة... قد يستغرق هذا بضع دقائق."):
+            from langchain_community.document_loaders import PyPDFDirectoryLoader
+            from langchain_text_splitters import RecursiveCharacterTextSplitter
+            
+            if os.path.isdir(DATA_DIR):
+                loader = PyPDFDirectoryLoader(DATA_DIR)
+                documents = loader.load()
+                
+                text_splitter = RecursiveCharacterTextSplitter(
+                    chunk_size=1000,
+                    chunk_overlap=200
+                )
+                chunks = text_splitter.split_documents(documents)
+                
+                vectorstore = Chroma.from_documents(
+                    documents=chunks,
+                    embedding=embeddings,
+                    persist_directory=CHROMA_DIR
+                )
+                st.success(f"تم تعبئة قاعدة البيانات تلقائياً بـ {len(chunks)} مقطع.")
+            else:
+                st.warning("لم يتم العثور على مجلد البيانات. تأكد من وجود مجلد 'data' يحتوي على ملفات PDF.")
+    
+    return vectorstore
+
+vectorstore = load_database()
 
 # دالة لتنسيق النصوص المسترجعة
 def format_docs(docs):
@@ -33,7 +69,6 @@ def format_docs(docs):
 
 if api_key:
     # 4. تجهيز قاعدة البيانات
-    vectorstore = load_database()
     retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
     
     # 5. تجهيز موديل الذكاء الاصطناعي وربطه بـ OpenRouter
