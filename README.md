@@ -115,8 +115,7 @@ Each document includes symptoms, causes, treatments, and authorized pesticides a
 ---
 
 ## 👨‍💻 Author
-- **Your Name** – Developer
-- Supervised by: ...
+- ahmed khaled 
 - Part of **NILEX.AI** – Digital Transformation for Egyptian Agriculture
 
 ---
